@@ -1,0 +1,9 @@
+{
+  "id": "JAS",
+  "name": "Jimbos and Stuff",
+  "author": ["me", "me"],
+  "description": "Adds more Jokers",
+  "prefix": "xmpl",
+  "main_file": "main.lua",
+  "version": "1.0.0"
+}
