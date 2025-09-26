@@ -37,6 +37,19 @@ function modify_joker_values(card, modifytbl, exclusions, ignoreimmutable, nodec
     if not nodeckeffects and cardwasindeck then card:add_to_deck(true) end
 end
 
+SMODS.Sound({
+	key = "emult",
+	path = "ExponentialMult.wav",
+})
+SMODS.Sound({
+	key = "echips",
+	path = "ExponentialChips.wav",
+})
+SMODS.Sound({
+	key = "xchip",
+	path = "MultiplicativeChips.wav",
+})
+
 if SMODS and SMODS.Mods and (not SMODS.Mods.Talisman or not SMODS.Mods.Talisman.can_load) then
 	local smods_xchips = false
 	for _, v in pairs(SMODS.scoring_parameter_keys) do
@@ -45,18 +58,6 @@ if SMODS and SMODS.Mods and (not SMODS.Mods.Talisman or not SMODS.Mods.Talisman.
 			break
 		end
 	end
-	SMODS.Sound({
-		key = "emult",
-		path = "ExponentialMult.wav",
-	})
-	SMODS.Sound({
-		key = "echips",
-		path = "ExponentialChips.wav",
-	})
-	SMODS.Sound({
-		key = "xchip",
-		path = "MultiplicativeChips.wav",
-	})
 	local scie = SMODS.calculate_individual_effect
 	function SMODS.calculate_individual_effect(effect, scored_card, key, amount, from_edition)
 		local ret = scie(effect, scored_card, key, amount, from_edition)
@@ -200,8 +201,6 @@ SMODS.Edition
         end
     end
 }
-
-
 
 SMODS.Joker
 {
@@ -414,24 +413,7 @@ SMODS.Joker
     end
 }
 
---[[SMODS.Joker:take_ownership("joker", 
-{
-    cost = 10,
-    loc_txt = {
-        name = "modefied joker",
-        text = {"{C:mult}+40{} mult"}
-    },
-    calculate = function(self, card, context)
-        if context.joker_main then
-            return{
-                card = card,
-                mult = 40,
-                message = '+' .. 40 .. " Mult",
-                colour = G.C.MULT
-            }
-        end
-    end
-})]]
+
 
 SMODS.Joker
 {
@@ -477,12 +459,11 @@ SMODS.Joker
     key = "simple joker",
     rarity = 3,
     cost = 9,
-    blueprint_compat = true,
+    blueprint_compat = false,
     loc_txt = {
         name = "Simplified Joker",
         text = {
-            "All cards are considered wild cards",
-            "Your playing cards can no longer be Debuffed"
+            "All cards are considered wild cards"
         }
     },
     atlas = "Jokers",
@@ -492,7 +473,7 @@ SMODS.Joker
         return{vars = {}}
     end,
     calculate = function (self, card, context)
-        if context.debuff_card and not context.retrigger_joker then
+        if context.debuff_card and not context.retrigger_joker and not context.blueprint_card then
             return{prevent_debuff = true}
         end
     end
@@ -545,8 +526,7 @@ SMODS.Joker
     loc_txt = {
         name = "Illusion Joker",
         text = {
-            "creates a negative {C:attention}Joker{} at the start of new round",
-            "{C:green}#1# in #2#{} chance to create a negative {C:attention}The Cooler Joker{} instead"
+            "creates a negative {C:attention}Joker{} at the start of new round"
         }
     },
     atlas = "Jokers",
@@ -554,7 +534,6 @@ SMODS.Joker
     config = {extra = {odds = 100}},
     loc_vars = function(self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS.j_joker
-        info_queue[#info_queue+1] = G.P_CENTERS.j_xmpl_cooler_joker
         local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, "xmpl_headache_joker")
         return { vars = { numerator, denominator} }
     end,
@@ -836,95 +815,142 @@ SMODS.Joker
     loc_txt = {
         name = "Corrupt Joker",
         text = {
-            "increases the chances for rares and uncommons"
+            "Increases the chances for Rares and Uncommons"
         }
     },
     atlas = "Jokers",
     pos = {x = 6, y = 1},
-    config = {extra = {expomult = 2}},
+    config = {extra = {}},
     loc_vars = function(self, info_queue, center)
         return {vars = {center.ability.extra.chips}}
     end,
-    calculate = function (self, card, context)
-        if context then
-            G.GAME.common_mod = 0
-            G.GAME.uncommon_mod = 0
-            G.GAME.rare_mod = 1
-        end
-        if context.selling_card and context.card == card then
-            G.GAME.common_mod = 0.7
-            G.GAME.uncommon_mod = 0.25
-            G.GAME.rare_mod = 0.05
+    add_to_deck = function (self, card, from_debuff)
+        G.GAME.common_mod = 0.6
+        G.GAME.uncommon_mod = 0.3
+        G.GAME.rare_mod = 0.1
+    end,
+    remove_from_deck = function (self, card, from_debuff)
+        G.GAME.common_mod = 0.7
+        G.GAME.uncommon_mod = 0.25
+        G.GAME.rare_mod = 0.05
+    end
+}
+
+
+SMODS.Joker
+{
+    key = "E_JOKER",
+    rarity = 3,
+    cost = 9,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Error Joker",
+        text = {
+            "{C:mult}^#1#{} Mult",
+            "{C:green}1 in 6{} to {C:attention}Delete your Save{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 7, y = 1},
+    config = {extra = {ExponentialMult = 4}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.ExponentialMult}}
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main then
+            local rand = math.random(1,6)
+            if rand == 1 then
+                SMODS.restart_game()
+                G.STATE =G.STATES.GAME_OVER
+                G.STATE_COMPLETE = false
+                G.FUNCS.quit()
+            end
+            return{
+                card = card,
+                e_mult = card.ability.extra.ExponentialMult,
+                message = "^" .. card.ability.extra.ExponentialMult .. " Mult",
+                colour = G.C.MULT,
+                sound = "xmpl_emult"
+            }
         end
     end
 }
 
---[[
-function rarity_thing()
-    if next(SMODS.find_card("j_xmpl_corrupt_joker")) then
-        for i = 1, #G.jokers.cards do
-            local joker_key = G.jokers.cards[i].config.key
-            if G.P_CENTERS[joker_key].rarity == 1 then
-                G.common_mod = G.common_mod + 0.05
-                G.uncommon_mod = G.uncommon_mod - 0.05
-                G.rare_mod = G.rare_mod - 0.05
-            end
-            if G.P_CENTERS[joker_key].rarity == 2 then
-                G.common_mod = G.common_mod - 0.05
-                G.uncommon_mod = G.uncommon_mod + 0.05
-                G.rare_mod = G.rare_mod - 0.05
-            end
-            if G.P_CENTERS[joker_key].rarity == 3 then
-                G.common_mod = G.common_mod - 0.05
-                G.uncommon_mod = G.uncommon_mod - 0.05
-                G.rare_mod = G.rare_mod + 0.05
-            end
-            if G.P_CENTERS[joker_key].rarity == 4 then
-                G.common_mod = G.common_mod - 0.05
-                G.uncommon_mod = G.uncommon_mod - 0.05
-                G.rare_mod = G.rare_mod - 0.05
-                G.legendary_mod = G.legendary_mod + 0.05
-            end
-            return true
-        end
-    end
-    G.common_mod = 0.7
-    G.uncommon_mod = 0.25
-    G.rare_mod = 0.05
-    G.legendary_mod = 0
-    return false
-end]]
-
---[[
 SMODS.Joker
 {
-    key = "retro joker",
-    rarity = 1,
-    cost = 2,
-    blueprint_compat = true,
+    key = "oversaturated joker",
+    rarity = 3,
+    cost = 9,
+    blueprint_compat = false,
     loc_txt = {
-        name = "Retro Joker",
+        name = "Oversaturated Joker",
         text = {
-            "{C:chips}+#1#{} Chips"
+            "{C:attention}+#1#{} Shop slot",
+            "{C:attention}+#2#{} Voucher slot",
+            "{C:attention}+#3#{} Booster slot"
         }
     },
     atlas = "Jokers",
-    pos = {x = 2, y = 1},
-    config = {extra = {chips = 40}},
+    pos = {x = 8, y = 1},
+    config = {extra = {extra_shop_slot = 1, extra_booster_slot = 1, extra_voucher_slot = 1,}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.chips}}
+        return {vars = {center.ability.extra.extra_shop_slot, center.ability.extra.extra_booster_slot, center.ability.extra.extra_voucher_slot}}
+    end,
+    add_to_deck = function (self, card, from_debuff)
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                change_shop_size(card.ability.extra.extra_shop_slot)
+                SMODS.change_booster_limit(card.ability.extra.extra_booster_slot)
+                SMODS.change_voucher_limit(card.ability.extra.extra_voucher_slot)
+                return true
+            end
+        }))
+    end,
+    remove_from_deck = function (self, card, from_debuff)
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                change_shop_size(-card.ability.extra.extra_shop_slot)
+                SMODS.change_booster_limit(-card.ability.extra.extra_booster_slot)
+                SMODS.change_voucher_limit(-card.ability.extra.extra_voucher_slot)
+                return true
+            end
+        }))
+    end
+}
+
+SMODS.Joker
+{
+    key = "swirly joker",
+    rarity = 2,
+    cost = 6,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Swirly Joker",
+        text = {
+            "Increases played cards' ranks"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 9, y = 1},
+    config = {extra = {}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {}}
     end,
     calculate = function(self, card, context)
-        if context.joker_main then
-            return{
-                card = card,
-                chip = card.ability.extra.chips,
-                message = '+' .. card.ability.extra.chips .. " Chips",
-                colour = G.C.CHIPS
-            }
+        if context.individual and context.cardarea == G.play then
+            for i = 1, #G.play.cards do
+                G.E_MANAGER:add_event(Event({
+                    delay = 0.1,
+                    func = function()
+                        assert(SMODS.modify_rank(G.play.cards[i], 1))
+                        return true
+                    end
+                }))
+            end
+            return{}
         end
     end
-}]]
+}
 
 ----------------------------------------------
 ------------MOD CODE END----------------------
