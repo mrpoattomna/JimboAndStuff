@@ -179,7 +179,10 @@ SMODS.Edition
     loc_txt = {
         name = "Blueprint Edition",
         label = "Blueprint",
-        text = {"Retriggers the Joker on the Right"}
+        text = {
+            "Retriggers the Joker on the Right",
+            "If on a card does nothing lol"
+        }
     },
     in_shop = true,
     weight = 4,
@@ -197,7 +200,9 @@ SMODS.Edition
             if G.jokers.cards[i] == card then other_joker1 = G.jokers.cards[i + 1] end
         end
         if context.retrigger_joker_check and not context.retrigger_joker and context.other_card == other_joker1 then
-            return {repetitions = 1}
+            return {
+                repetitions = 1
+            }
         end
     end
 }
@@ -211,14 +216,15 @@ SMODS.Joker
     loc_txt = {
         name = "The Cooler Joker",
         text = {
-            "{X:mult,C:white}X#1#{} Mult"
+            "{X:mult,C:white}X#1#{} Mult",
+            "{V:1}Yes I did steal that idea{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 0, y = 0},
     config = {extra = {Xmult = 4}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.Xmult}}
+        return {vars = {center.ability.extra.Xmult, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -241,14 +247,15 @@ SMODS.Joker
         text = {
             "Gain {C:money}#1#${} when you",
             "Enter a Boss Blind",
-            "and When you Defeat it"
+            "and When you Defeat it",
+            "{V:1}YOINK{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 1, y = 0},
     config = {extra = {dollars = 8 }},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.dollars}}
+        return {vars = {center.ability.extra.dollars, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.setting_blind and G.GAME.blind.boss then
@@ -275,8 +282,9 @@ SMODS.Joker
     loc_txt = {
         name = "3D Joker",
         text = {
-            "Has a {C:green}#1# in #2#{} chance of making a Joker Negative",
-            "At the start of a round"
+            "Has a {C:green, E:1}#1# in #2#{} chance of making a Joker Negative",
+            "At the start of a round",
+            "{V:1}Hey this doesn't look 3D{}"
         }
     },
     atlas = "Jokers",
@@ -284,7 +292,7 @@ SMODS.Joker
     config = {extra = {odds = 10}},
     loc_vars = function(self, info_queue, card)
         local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, "xmpl_3D_joker")
-        return { vars = { numerator, denominator} }
+        return { vars = { numerator, denominator, colours = {HEX("dda0dd")}} }
     end,
     
     calculate = function(self, card, context)
@@ -319,7 +327,10 @@ SMODS.Joker
     cost = 3,
     blueprint_compat = true,
     loc_txt = {
-        name = "Blurry Joker"
+        name = "Blurry Joker",
+        text = {
+            "{V:1}Gambling core{}"
+        }
     },
     atlas = "Jokers",
     pos = {x = 3, y = 0},
@@ -336,7 +347,7 @@ SMODS.Joker
             { n = G.UIT.O, config = { object = DynaText({ string = r_Xmoney, colours = {G.C.MONEY}, pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0 }) } },
             { n = G.UIT.T, config = { text = ' Dollars', colour = G.C.MONEY, scale = 0.32 } },
             }
-        return {main_start = main_start}
+        return {main_start = main_start, vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -360,14 +371,15 @@ SMODS.Joker
     loc_txt = {
         name = "Ultima Joker",
         text = {
-            "Retriggers all Jokers"
+            "Retriggers all Jokers",
+            "{V:1}The Ultimate Life Form{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 4, y = 0},
     config = {extra = {}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {}}
+        return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.retrigger_joker_check and not context.retrigger_joker then
@@ -383,7 +395,10 @@ SMODS.Joker
     cost = 2,
     blueprint_compat = true,
     loc_txt = {
-        name = "Jiggly Joker"
+        name = "Jiggly Joker",
+        text = {
+            "{V:1}wobble* wobble*{}"
+        }
     },
     atlas = "Jokers",
     pos = {x = 5, y = 0},
@@ -400,7 +415,7 @@ SMODS.Joker
             { n = G.UIT.O, config = { object = DynaText({ string = r_chips, colours = {G.C.CHIPS}, pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0 }) } },
             { n = G.UIT.T, config = { text = ' Chips', colour = G.C.BLACK, scale = 0.32 } }
             }
-        return {main_start = main_start}
+        return {main_start = main_start, vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -422,7 +437,10 @@ SMODS.Joker
     cost = 10,
     blueprint_compat = true,
     loc_txt = {
-        name = "Glitched Joker"
+        name = "Glitched Joker",
+        text = {
+            "{V:1}wow this mod sure loves Gambling{}"
+        }
     },
     atlas = "Jokers",
     pos = {x = 6, y = 0},
@@ -439,7 +457,7 @@ SMODS.Joker
             { n = G.UIT.O, config = { object = DynaText({ string = r_mults, pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0 }) } },
             { n = G.UIT.T, config = { text = ' Mult', colour = G.C.BLACK, scale = 0.32 } }
             }
-        return {main_start = main_start}
+        return {main_start = main_start, vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -463,14 +481,15 @@ SMODS.Joker
     loc_txt = {
         name = "Simplified Joker",
         text = {
-            "All cards are considered wild cards"
+            "All cards are considered wild cards",
+            "{V:1}are suits too much for you?{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 7, y = 0},
     loc_vars = function (self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS.m_wild
-        return{vars = {}}
+        return{vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function (self, card, context)
         if context.debuff_card and not context.retrigger_joker and not context.blueprint_card then
@@ -498,14 +517,16 @@ SMODS.Joker
     loc_txt = {
         name = "Mosaic Joker",
         text = {
-            "{X:chips,C:white}X#1#{} Chips"
+            "{X:chips,C:white}X#1#{} Chips",
+            "{V:1}YOO Xchips that is in almost{}",
+            "{V:1}every mod so original{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 8, y = 0},
     config = {extra = {Xchips = 4}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.Xchips}}
+        return {vars = {center.ability.extra.Xchips, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -526,7 +547,8 @@ SMODS.Joker
     loc_txt = {
         name = "Illusion Joker",
         text = {
-            "creates a negative {C:attention}Joker{} at the start of new round"
+            "creates a negative {C:attention}Joker{} at the start of new round",
+            "{V:1}hey no you can't just sell them for money{}"
         }
     },
     atlas = "Jokers",
@@ -535,7 +557,7 @@ SMODS.Joker
     loc_vars = function(self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS.j_joker
         local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, "xmpl_headache_joker")
-        return { vars = { numerator, denominator} }
+        return { vars = { numerator, denominator, colours = {HEX("dda0dd")}} }
     end,
     calculate = function(self, card, context)
         if context.setting_blind then
@@ -569,6 +591,9 @@ SMODS.Joker
     blueprint_compat = true,
     loc_txt = {
         name = "Static Joker",
+        text = {
+            "{V:1}CAN YOU STOP WITH THE GAMBLING{}"
+        }
     },
     atlas = "Jokers",
     pos = {x = 0, y = 1},
@@ -585,7 +610,7 @@ SMODS.Joker
             { n = G.UIT.O, config = { object = DynaText({ string = r_chips, colours = {G.C.CHIPS}, pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0 }) } },
             { n = G.UIT.T, config = { text = ' Chips', colour = G.C.BLACK, scale = 0.32 } }
             }
-        return {main_start = main_start}
+        return {main_start = main_start, vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -611,14 +636,16 @@ SMODS.Joker
         text = {
             "For each . in a Joker's name",
             "Retriggers all aces played",
-            "{C:attention}Will contain dots from (i)s and (j)s etc"
+            "{C:attention}Will contain dots from (i)s and (j)s etc",
+            "{V:1}this one is stupid{}",
+            "{V:1}I don't even think this works right{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 1, y = 1},
     config = {extra = {}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {}}
+        return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.repetition and context.cardarea == G.play then
@@ -680,14 +707,15 @@ SMODS.Joker
     loc_txt = {
         name = "Retro Joker",
         text = {
-            "{C:chips}+#1#{} Chips"
+            "{C:chips}+#1#{} Chips",
+            "{V:1}hey look, retroslop{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 2, y = 1},
     config = {extra = {chips = 40}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.chips}}
+        return {vars = {center.ability.extra.chips, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -710,7 +738,9 @@ SMODS.Joker
         text = {
             "Gains {X:mult,C:white}#1#X{}",
             "For every {C:money}1${} you have",
-            "Currently {X:mult,C:white}X#2#{}"
+            "Currently {X:mult,C:white}X#2#{}",
+            "{V:1}Jimbo's Chineese cousin{}",
+            "{V:1}Jimbo hates him{}"
         }
     },
     atlas = "Jokers",
@@ -718,7 +748,7 @@ SMODS.Joker
     config = {extra = {Xmoney_mult = 1}},
     loc_vars = function(self, info_queue, center)
         local Xmulty = G.GAME.dollars * center.ability.extra.Xmoney_mult
-        return {vars = {center.ability.extra.Xmoney_mult,Xmulty}}
+        return {vars = {center.ability.extra.Xmoney_mult,Xmulty,  colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         card.ability.extra.Xmult = G.GAME.dollars
@@ -739,7 +769,8 @@ SMODS.Joker
     loc_txt = {
         name = "Static TV",
         text = {
-            "Warning: May cause Lag"
+            "Warning: May cause Lag",
+            "{V:1}FUNNY MESS GO BRRRRRRRRR{}"
         }
     },
     atlas = "Jokers",
@@ -757,7 +788,7 @@ SMODS.Joker
             { n = G.UIT.O, config = { object = DynaText({ string = r_mult, colours = {G.C.IMPORTANT}, pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0 }) } },
             { n = G.UIT.T, config = { text = ' All values', colour = G.C.BLACK, scale = 0.32 } }
             }
-        return {main_start = main_start}
+        return {main_start = main_start, vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -786,14 +817,15 @@ SMODS.Joker
         name = "Saturated Joker",
         text = {
             "{C:chips}+#1#{} Chips",
-            "{C:mult}+#2#{} Mult"
+            "{C:mult}+#2#{} Mult",
+            "{V:1}Not that bad to look at{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 5, y = 1},
     config = {extra = {chips = 200, mult = 20}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.chips, center.ability.extra.mult}}
+        return {vars = {center.ability.extra.chips, center.ability.extra.mult, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -815,24 +847,25 @@ SMODS.Joker
     loc_txt = {
         name = "Corrupt Joker",
         text = {
-            "Increases the chances for Rares and Uncommons"
+            "Increases the chances for Rares and Uncommons",
+            "{V:1}Sharp looking{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 6, y = 1},
     config = {extra = {}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.chips}}
+        return {vars = {center.ability.extra.chips, colours = {HEX("dda0dd")}}}
     end,
     add_to_deck = function (self, card, from_debuff)
-        G.GAME.common_mod = 0.6
-        G.GAME.uncommon_mod = 0.3
-        G.GAME.rare_mod = 0.1
+        G.GAME.common_mod = (G.GAME.common_mod or 0.7) - 0.1
+        G.GAME.uncommon_mod = (G.GAME.uncommon_mod or 0.25) + 0.05
+        G.GAME.rare_mod = (G.GAME.rare_mod or 0.05) + 0.05
     end,
     remove_from_deck = function (self, card, from_debuff)
-        G.GAME.common_mod = 0.7
-        G.GAME.uncommon_mod = 0.25
-        G.GAME.rare_mod = 0.05
+        G.GAME.common_mod = G.GAME.common_mod + 0.1
+        G.GAME.uncommon_mod = G.GAME.uncommon_mod - 0.05
+        G.GAME.rare_mod = G.GAME.rare_mod - 0.05
     end
 }
 
@@ -846,15 +879,18 @@ SMODS.Joker
     loc_txt = {
         name = "Error Joker",
         text = {
-            "{C:mult}^#1#{} Mult",
-            "{C:green}1 in 6{} to {C:attention}Delete your Save{}"
+            "{X:mult,C:white}^#1#{} Mult",
+            "{C:green, E:1}1 in 6{} to {C:attention}Delete your Run{}",
+            "{V:1}If you win a run with this guy{}",
+            "{V:1}Go play the lottery{}",
+            "{V:1}also oops doesn't affect him cause I am nice{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 7, y = 1},
     config = {extra = {ExponentialMult = 4}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.ExponentialMult}}
+        return {vars = {center.ability.extra.ExponentialMult, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -887,14 +923,15 @@ SMODS.Joker
         text = {
             "{C:attention}+#1#{} Shop slot",
             "{C:attention}+#2#{} Voucher slot",
-            "{C:attention}+#3#{} Booster slot"
+            "{C:attention}+#3#{} Booster slot",
+            "{V:1}EWW why did I do that{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 8, y = 1},
     config = {extra = {extra_shop_slot = 1, extra_booster_slot = 1, extra_voucher_slot = 1,}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.extra_shop_slot, center.ability.extra.extra_booster_slot, center.ability.extra.extra_voucher_slot}}
+        return {vars = {center.ability.extra.extra_shop_slot, center.ability.extra.extra_booster_slot, center.ability.extra.extra_voucher_slot, colours = {HEX("dda0dd")}}}
     end,
     add_to_deck = function (self, card, from_debuff)
         G.E_MANAGER:add_event(Event({
@@ -927,14 +964,17 @@ SMODS.Joker
     loc_txt = {
         name = "Swirly Joker",
         text = {
-            "Increases played cards' ranks"
+            "Increases played card's rank by {C:attention}1{}",
+            "{V:1}Fun Fact: almost every joker is just jimbo{}",
+            "{V:1}in a random filter in photopea...",
+            "{V:I suck at graphics and art}"
         }
     },
     atlas = "Jokers",
     pos = {x = 9, y = 1},
     config = {extra = {}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {}}
+        return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play then
@@ -951,6 +991,158 @@ SMODS.Joker
         end
     end
 }
+
+SMODS.JimboQuip({
+	key = 'evil_quip1',
+	type = 'loss',
+    filter = function(self, type)
+        if next(SMODS.find_card('j_xmpl_evil_joker')) then
+            return true, {weight = 33}
+        end
+    end,
+    extra = {center = "j_xmpl_evil_joker"}
+})
+
+SMODS.JimboQuip({
+	key = 'evil_quip2',
+	type = 'loss',
+    filter = function(self, type)
+        if next(SMODS.find_card('j_xmpl_evil_joker')) then
+            return true, {weight = 33}
+        end
+    end,
+    extra = {center = "j_xmpl_evil_joker"}
+})
+
+SMODS.JimboQuip({
+	key = 'evil_quip3',
+	type = 'loss',
+    filter = function(self, type)
+        if next(SMODS.find_card('j_xmpl_evil_joker')) then
+            return true, {weight = 33}
+        end
+    end,
+    extra = {center = "j_xmpl_evil_joker"}
+})
+
+SMODS.JimboQuip({
+	key = 'evil_quip4',
+	type = 'loss',
+    filter = function(self, type)
+        if next(SMODS.find_card('j_xmpl_evil_joker')) then
+            return true, {weight = 33}
+        end
+    end,
+    extra = {center = "j_xmpl_evil_joker"}
+})
+
+SMODS.JimboQuip({
+	key = 'evil_quip5',
+	type = 'loss',
+    filter = function(self, type)
+        if next(SMODS.find_card('j_xmpl_evil_joker')) then
+            return true, {weight = 33}
+        end
+    end,
+    extra = {center = "j_xmpl_evil_joker"}
+})
+
+SMODS.Joker
+{
+    key = "evil_joker",
+    rarity = 3,
+    cost = 20,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "{C:red}EVIL{} Joker",
+        text = {
+            "Refuses to reveal his {C:red, E:2}EVIL{} plan",
+            "{X:mult,C:white}X100{} Mult",
+            "{X:chips,C:white}X100{} Chips",
+            "{V:1}Jimbo's evil clone{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 0, y = 2},
+    config = {extra = {}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main then
+            G.STATE = G.STATES.GAME_OVER
+            G.STATE_COMPLETE = false
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "outline joker",
+    rarity = 2,
+    cost = 7,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Outline Joker",
+        text = {
+            "gains {X:mult,C:white}X#1#{}",
+            "When a card with the {C:spades}Spades{} or {C:clubs}Clubs{} Suit is scored",
+            "when it reaches {X:mult,C:white}X#2#{} mult",
+            "Gains {C:attention}#3# Joker Slot{} and resets its mult",
+            "Currently {X:mult,C:white}X#4#{} mult",
+            "Currently {C:attention}+#5#{} Joker Slots",
+            "{V:1}Couldn't think of a name{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 1, y = 2},
+    config = {extra = {extra_Xmult = 10, required_mult = 10, extra_Joker_slot = 1, current_Xmult = 1, current_Joker_slots = 0}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {
+            center.ability.extra.extra_Xmult, 
+            center.ability.extra.required_mult, 
+            center.ability.extra.extra_Joker_slot, 
+            center.ability.extra.current_Xmult,
+            center.ability.extra.immutable.current_Joker_slots,
+            colours = {HEX("dda0dd")}
+        }}
+    end,
+    calculate = function (self, card, context)
+        if context.individual and context.cardarea == G.play and 
+        (context.other_card:is_suit("Clubs") or  context.other_card:is_suit("Spades")) then
+            card.ability.extra.current_Xmult = card.ability.extra.current_Xmult + card.ability.extra.extra_Xmult
+            if card.ability.extra.current_Xmult >= card.ability.extra.required_mult then
+                card.ability.extra.immutable.current_Joker_slots = card.ability.extra.immutable.current_Joker_slots + card.ability.extra.extra_Joker_slot
+                G.jokers:change_size(card.ability.extra.extra_Joker_slot)
+                card.ability.extra.current_Xmult = 1
+                return{
+                    message = "Upgrade",
+                    colour = G.C.IMPORTANT,
+                    message_card = card
+                }
+            end
+            return{
+                message = "Upgrade",
+                colour = G.C.IMPORTANT,
+                message_card = card
+            }
+        end
+        if context.joker_main then
+            print(card.ability.extra.immutable.current_Joker_slots)
+            return{
+                Xmult = card.ability.extra.current_Xmult
+            }
+        end
+    end,
+    add_to_deck = function(self, card, from_debuff)
+        G.jokers:change_size(card.ability.extra.immutable.current_Joker_slots)
+    end,
+    remove_from_deck = function (self, card, from_debuff)
+        G.jokers:change_size(-card.ability.extra.immutable.current_Joker_slots)
+    end
+}
+
+
 
 ----------------------------------------------
 ------------MOD CODE END----------------------
