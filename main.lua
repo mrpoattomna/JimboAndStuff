@@ -742,7 +742,7 @@ SMODS.Joker
     loc_txt = {
         name = "Jim",
         text = {
-            "Gains {X:mult,C:white}#1#X{}",
+            "Gains {X:mult,C:white}#1#X{} Mult",
             "For every {C:money}1${} you have",
             "Currently {X:mult,C:white}X#2#{}",
             "{V:1}Jimbo's Chineese cousin{}",
@@ -1475,7 +1475,36 @@ SMODS.Joker
     end
 }
 
-
+SMODS.Joker
+{
+    key = "cosmic_belt",
+    rarity = 4,
+    cost = 25,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Cosmic Belt",
+        text = {
+            "{C:green,E:1}#1# in #2#{} chance to double the Level of played Poker hand",
+            "{V:1}Made From a Supernova inside a Blackhole{}",
+            "{V:1}I don't know how space works{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 9, y = 2},
+    config = {extra = {odds = 4}},
+    loc_vars = function(self, info_queue, card)
+        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, "xmpl_cosmic_belt")
+        return {vars = {numerator, denominator, colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.before and SMODS.pseudorandom_probability(card, "xmpl_cosmic_belt", 1, card.ability.extra.odds) then
+            return{
+                level_up = G.GAME.hands[context.scoring_name].level,
+                message = "Level Up"
+            }
+        end
+    end
+}
 
 ----------------------------------------------
 ------------MOD CODE END----------------------
