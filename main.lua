@@ -241,7 +241,7 @@ SMODS.Joker
     key = "looting joker",
     rarity = 2,
     cost = 7,
-    blueprint_compat = false,
+    blueprint_compat = true,
     loc_txt = {
         name = "Looter Joker",
         text = {
@@ -591,7 +591,7 @@ SMODS.Joker
     loc_txt = {
         name = "Static Joker",
         text = {
-            "{V:1}CAN YOU STOP WITH THE GAMBLING{}"
+            "{V:1}I CAN'T STOP WITH THESE JOKERS{}"
         }
     },
     atlas = "Jokers",
@@ -959,7 +959,7 @@ SMODS.Joker
     key = "swirly joker",
     rarity = 2,
     cost = 6,
-    blueprint_compat = true,
+    blueprint_compat = false,
     loc_txt = {
         name = "Swirly Joker",
         text = {
@@ -976,7 +976,7 @@ SMODS.Joker
         return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play then
+        if context.individual and context.cardarea == G.play and not context.blueprint_card then
             for i = 1, #G.play.cards do
                 G.E_MANAGER:add_event(Event({
                     delay = 0.1,
@@ -1051,7 +1051,7 @@ SMODS.Joker
     key = "evil_joker",
     rarity = 3,
     cost = 20,
-    blueprint_compat = true,
+    blueprint_compat = false,
     loc_txt = {
         name = "{C:red}EVIL{} Joker",
         text = {
@@ -1108,9 +1108,9 @@ SMODS.Joker
     end,
     calculate = function (self, card, context)
         if context.individual and context.cardarea == G.play and 
-        (context.other_card:is_suit("Clubs") or  context.other_card:is_suit("Spades")) then
+        (context.other_card:is_suit("Clubs") or  context.other_card:is_suit("Spades")) and not context.blueprint_card then
             card.ability.extra.current_Xmult = card.ability.extra.current_Xmult + card.ability.extra.extra_Xmult
-            if card.ability.extra.current_Xmult >= card.ability.extra.required_mult then
+            if card.ability.extra.current_Xmult >= card.ability.extra.required_mult and not context.blueprint_card then
                 card.ability.extra.current_Joker_slots = card.ability.extra.current_Joker_slots + card.ability.extra.extra_Joker_slot
                 G.jokers:change_size(card.ability.extra.extra_Joker_slot)
                 card.ability.extra.current_Xmult = 1
@@ -1159,6 +1159,7 @@ SMODS.Joker
     pos = {x = 2, y = 2},
     config = {extra = {}},
     loc_vars = function(self, info_queue, center)
+        info_queue[#info_queue+1] = G.P_CENTERS.e_xmpl_blueprint_edition
         return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
@@ -1189,12 +1190,12 @@ SMODS.Joker
     key = "pixilated joker",
     rarity = 3,
     cost = 8,
-    blueprint_compat = true,
+    blueprint_compat = false,
     loc_txt = {
         name = "Pixilated Joker",
         text = {
-            "Applies a random Edition or Seal or Enhancement",
-            "On All the scoring cards",
+            "Applies a random {C:attention}Edition{} or {C:attention}Seal{} or {C:attention}Enhancement{}",
+            "On all scoring cards",
             "{V:1}The pixels are WAY too big{}"
         }
     },
@@ -1202,10 +1203,10 @@ SMODS.Joker
     pos = {x = 3, y = 2},
     config = {extra = {}},
     loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.chips, colours = {HEX("dda0dd")}}}
+        return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
-        if context.cardarea == G.play and context.individual then
+        if context.before and context.cardarea == G.play and context.main_eval and not context.blueprint_card then
             local rand_ench = math.random(1,3)
             if rand_ench == 1 then
                 local enhancement_pool = {}
@@ -1237,6 +1238,31 @@ SMODS.Joker
                 }
             end
         end
+    end
+}
+
+SMODS.Joker
+{
+    key = "black and white joker",
+    rarity = 1,
+    cost = 5,
+    blueprint_compat = false,
+    loc_txt = {
+        name = "Black and White Joker",
+        text = {
+            "{C:money}+#1#${} per Joker",
+            "Currently {C:money}+#2#${} at the end of round",
+            "{V:1}We ran out of colors{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 4, y = 2},
+    config = {extra = {dollars = 1}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.dollars, center.ability.extra.dollars*(G.jokers and #G.jokers.cards or 0), colours = {HEX("dda0dd")}}}
+    end,
+    calc_dollar_bonus = function(self, card)
+        return card.ability.extra.dollars*(G.jokers and #G.jokers.cards or 0)
     end
 }
 
