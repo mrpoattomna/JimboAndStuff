@@ -50,6 +50,11 @@ SMODS.Sound({
 	path = "MultiplicativeChips.wav",
 })
 
+SMODS.Sound({
+	key = "explode",
+	path = "explosion.ogg",
+})
+
 if SMODS and SMODS.Mods and (not SMODS.Mods.Talisman or not SMODS.Mods.Talisman.can_load) then
 	local smods_xchips = false
 	for _, v in pairs(SMODS.scoring_parameter_keys) do
@@ -171,6 +176,8 @@ SMODS.Sound({
     key = "error",
     path = "error.ogg",
 })
+
+
 
 SMODS.Edition
 {
@@ -874,7 +881,7 @@ SMODS.Joker
 
 SMODS.Joker
 {
-    key = "E_JOKER",
+    key = "error_joker",
     rarity = 3,
     cost = 9,
     blueprint_compat = true,
@@ -882,7 +889,7 @@ SMODS.Joker
         name = "Error Joker",
         text = {
             "{X:mult,C:white}^#1#{} Mult",
-            "{C:green, E:1}1 in 6{} {C:attention}FIXED CHANCE{} to {C:attention}Delete your Run{}",
+            "{C:green,E:1}#2# in #3#{} {C:attention}FIXED CHANCE{} to {C:attention}Delete your Run{}",
             "{V:1}If you win a whole run with this guy{}",
             "{V:1}Go play the lottery{}",
             "{V:1}also oops doesn't affect him cause I am nice{}"
@@ -890,14 +897,14 @@ SMODS.Joker
     },
     atlas = "Jokers",
     pos = {x = 7, y = 1},
-    config = {extra = {ExponentialMult = 4}},
-    loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.ExponentialMult, colours = {HEX("dda0dd")}}}
+    config = {extra = {ExponentialMult = 4, immutable = {odds = 6}}},
+    loc_vars = function(self, info_queue, card)
+        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.immutable.odds, "xmpl_error_joker", false, true)
+        return {vars = {card.ability.extra.ExponentialMult, numerator, denominator, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
         if context.joker_main then
-            local rand = math.random(1,6)
-            if rand == 1 then
+            if SMODS.pseudorandom_probability(card, "xmpl_error_joker", 1, card.ability.extra.immutable.odds, nil, true) then
                 SMODS.restart_game()
                 G.STATE =G.STATES.GAME_OVER
                 G.STATE_COMPLETE = false
@@ -905,7 +912,7 @@ SMODS.Joker
             end
             return{
                 card = card,
-                e_mult = card.ability.extra.ExponentialMult,
+                Emult_mod = card.ability.extra.ExponentialMult,
                 message = "^" .. card.ability.extra.ExponentialMult .. " Mult",
                 colour = G.C.MULT,
                 sound = "xmpl_emult"
@@ -1325,21 +1332,32 @@ SMODS.Joker
     loc_txt = {
         name = "Glitchyness",
         text = {
-            "Retriggers played cards between {C:attention}#1#-#2#{} Times",
-            "{V:1}Nope I can't animate{}"
+            "{C:green,E:1}#1# in #2#{} {C:attention}FIXED CHANCE{} to retrigger",
+            "all scoring cards",
+            "{V:1}surely not putting a limit to this will not bite me back, right?{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 6, y = 2},
-    config = {extra = {min_rep = 0, max_rep = 5}},
-    loc_vars = function(self, info_queue, center)
-        return {vars = {center.ability.extra.min_rep, center.ability.extra.max_rep, colours = {HEX("dda0dd")}}}
+    config = {extra = {immutable = {odds = 2}}},
+    loc_vars = function(self, info_queue, card)
+        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.immutable.odds, "xmpl_glitchyness", false, true)
+        return {vars = {numerator, denominator, colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
+        func = function (card, context, count)
+            if SMODS.pseudorandom_probability(card, "xmpl_glitchyness", 1, card.ability.extra.immutable.odds, nil, true) then
+                count = count + 1
+                return func(card, context, count)
+            else
+                return count
+            end
+        end
         if context.repetition and context.cardarea == G.play then
-            local reps = math.random(card.ability.extra.min_rep, card.ability.extra.max_rep)
+            local count = 0
+            count = func(card, context, count)
             return{
-                repetitions = math.floor(reps+0.5),
+                repetitions = count,
                 message = "Again!"
             }
         end
@@ -1374,6 +1392,90 @@ SMODS.Joker
         G.jokers:change_size(-card.ability.extra.extra_joker_slots)
     end
 }
+
+SMODS.Joker
+{
+    key = "circle_joker",
+    rarity = 1,
+    cost = 6,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Circle Joker",
+        text = {
+            "{C:chips}+#1#{} Chips Per {C:attention}Stone Card{} scored",
+            "Currently {C:chips}+#2#{} Chips",
+            "If you have four extra copies of this Joker",
+            "Gives {X:chips,C:white}X#3#{} Chips",
+            "{C:green,E:1}#4# in #5#{} of creating a negative copy of itself",
+            "{C:green,E:1}#6# in #7#{} of destroying itself",
+            "{V:1}Yes I took Jimbo and Turned him into a circle, Kinda{}",
+            "{V:1}I don't regret disfiguring him{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 8, y = 2},
+    config = {extra = {chips = 15, Xchips = 2, odds1 = 20, odds2 = 10, current_chips = 0}},
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = G.P_CENTERS.m_stone
+        local numerator1, denominator1 = SMODS.get_probability_vars(card, 1, card.ability.extra.odds1, "xmpl_circle_joker")
+        local numerator2, denominator2 = SMODS.get_probability_vars(card, 1, card.ability.extra.odds2, "xmpl_circle_joker")
+        return {vars = {card.ability.extra.chips, card.ability.extra.current_chips, card.ability.extra.Xchips,
+        numerator1, denominator1, numerator2, denominator2, colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.setting_blind and SMODS.pseudorandom_probability(card, "xmpl_circle_joker", 1, card.ability.extra.odds1) then
+            return{
+                SMODS.add_card
+                    {
+                        key = "j_xmpl_circle_joker",
+                        edition = "e_negative"
+                    }
+            }
+        end
+        if context.setting_blind and not context.blueprint_card then
+            if SMODS.pseudorandom_probability(card, "xmpl_circle_joker", 1, card.ability.extra.odds2) then
+                SMODS.destroy_cards(card, nil, nil, true)
+                return{
+                    message = "DESTROYED",
+                    sound = "xmpl_explode"
+                }
+            else
+                return{
+                    message = "Safe"
+                }
+            end
+        end
+        if context.individual and context.cardarea == G.play then
+            if SMODS.has_enhancement(context.other_card, "m_stone") then
+                card.ability.extra.current_chips = card.ability.extra.current_chips + card.ability.extra.chips
+                return{
+                    message = "Upgrade",
+                    message_card = card
+                }
+            end
+        end
+        if context.joker_main then
+            local count = 0
+            for i = 1, #G.jokers.cards do
+                if G.jokers.cards[i].config.center.key == "j_xmpl_circle_joker" then
+                    count = count + 1
+                end
+            end
+            if count >= 5 then
+                return{
+                    xchips = card.ability.extra.Xchips,
+                    chips = card.ability.extra.current_chips
+                }
+            else
+                return{
+                    chips = card.ability.extra.current_chips
+                }
+            end
+        end
+    end
+}
+
+
 
 ----------------------------------------------
 ------------MOD CODE END----------------------
