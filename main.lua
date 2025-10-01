@@ -798,6 +798,9 @@ SMODS.Joker
                     modify_joker_values(G.jokers.cards[i], {["*"] = mult_rand}, {x_mult = 1, x_chips = 1, card_limit = true, extra_slots_used = true})
                 end
             end
+            for i = 1, #G.consumeables.cards do
+                modify_joker_values(G.consumeables.cards[i], {["*"] = mult_rand}, {x_mult = 1, x_chips = 1, card_limit = true, extra_slots_used = true})
+            end
             return{
                 message = 'X' .. mult_rand .. " Values",
                 colour = G.C.MULT
@@ -1206,35 +1209,40 @@ SMODS.Joker
         return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
-        if context.before and context.cardarea == G.play and context.main_eval and not context.blueprint_card then
-            local rand_ench = math.random(1,3)
-            if rand_ench == 1 then
-                local enhancement_pool = {}
-                for _, enhancement in pairs(G.P_CENTER_POOLS.Enhanced) do
-                    if enhancement.key ~= 'm_stone' then
-                        enhancement_pool[#enhancement_pool + 1] = enhancement
+        if context.before and not context.blueprint_card then
+            local cards = 0
+            for _, scored_card in ipairs(context.scoring_hand) do
+                local rand_ench = math.random(1,3)
+                if rand_ench == 1 then
+                    local enhancement_pool = {}
+                    for _, enhancement in pairs(G.P_CENTER_POOLS.Enhanced) do
+                        if enhancement.key ~= 'm_stone' then
+                            enhancement_pool[#enhancement_pool + 1] = enhancement
+                        end
+                    end
+                    local random_enhancement = pseudorandom_element(enhancement_pool, 'edit_card_enhancement')
+                    scored_card:set_ability(random_enhancement)
+                elseif rand_ench == 2 then
+                    local random_seal = SMODS.poll_seal({mod = 10, guaranteed = true})
+                    if random_seal then
+                        scored_card:set_seal(random_seal, true, true)
+                    end
+                elseif rand_ench == 3 then
+                    local random_edition = poll_edition('edit_card_edition', nil, true, true)
+                    if random_edition then
+                        scored_card:set_edition(random_edition, true, true)
                     end
                 end
-                local random_enhancement = pseudorandom_element(enhancement_pool, 'edit_card_enhancement')
-                context.other_card:set_ability(random_enhancement)
-                return {
-                    message = "Card Modified!"
-                }
-            elseif rand_ench == 2 then
-                local random_seal = SMODS.poll_seal({mod = 10, guaranteed = true})
-                if random_seal then
-                    context.other_card:set_seal(random_seal, true)
-                end
-                return {
-                    message = "Card Modified!"
-                }
-            elseif rand_ench == 3 then
-                local random_edition = poll_edition('edit_card_edition', nil, true, true)
-                if random_edition then
-                    context.other_card:set_edition(random_edition, true)
-                end
-                return {
-                    message = "Card Modified!"
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        scored_card:juice_up()
+                        return true
+                    end
+                }))
+            end
+            if cards then
+                return{
+                    message = "Cards Modified"
                 }
             end
         end
@@ -1252,7 +1260,7 @@ SMODS.Joker
         text = {
             "{C:money}+#1#${} per Joker",
             "Currently {C:money}+#2#${} at the end of round",
-            "{V:1}We ran out of colors{}"
+            "{V:1}I ran out of colors{}"
         }
     },
     atlas = "Jokers",
@@ -1263,6 +1271,107 @@ SMODS.Joker
     end,
     calc_dollar_bonus = function(self, card)
         return card.ability.extra.dollars*(G.jokers and #G.jokers.cards or 0)
+    end
+}
+
+SMODS.Joker
+{
+    key = "2 sides",
+    rarity = 2,
+    cost = 7,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "2 Sides",
+        text = {
+            "Copies a Joker to its left",
+            "or to its right",
+            "Will only activate when hand is {C:attention}Played{}",
+            "{V:1}I just make random stuff deal with it"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 5, y = 2},
+    config = {extra = {}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main then
+            local copy = math.random(1,2)
+            if copy == 1 then
+                local other_joker = nil
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i] == card then other_joker = G.jokers.cards[i + 1] end
+                end
+                return SMODS.blueprint_effect(card, other_joker, context)
+            end
+            if copy == 2 then
+                local other_joker = nil
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i] == card then other_joker = G.jokers.cards[i - 1] end
+                end
+                return SMODS.blueprint_effect(card, other_joker, context)
+            end
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "glitchyness",
+    rarity = 3,
+    cost = 9,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Glitchyness",
+        text = {
+            "Retriggers played cards between {C:attention}#1#-#2#{} Times",
+            "{V:1}Nope I can't animate{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 6, y = 2},
+    config = {extra = {min_rep = 0, max_rep = 5}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.min_rep, center.ability.extra.max_rep, colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.repetition and context.cardarea == G.play then
+            local reps = math.random(card.ability.extra.min_rep, card.ability.extra.max_rep)
+            return{
+                repetitions = math.floor(reps+0.5),
+                message = "Again!"
+            }
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "inverted joker",
+    rarity = 3,
+    cost = 10,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Inverted Joker",
+        text = {
+            "{C:attention}+#1#{} Joker Slots",
+            "{V:1}I was too lazy to steal the asset of negative Joker{}",
+            "{V:1}actually forget that I said anything about stealing stuff{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 7, y = 2},
+    config = {extra = {extra_joker_slots = 2}, card_limit = 1},
+    
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.extra_joker_slots, colours = {HEX("dda0dd")}}}
+    end,
+    add_to_deck = function (self, card, from_debuff)
+        G.jokers:change_size(card.ability.extra.extra_joker_slots)
+    end,
+    remove_from_deck = function (self, card, from_debuff)
+        G.jokers:change_size(-card.ability.extra.extra_joker_slots)
     end
 }
 
