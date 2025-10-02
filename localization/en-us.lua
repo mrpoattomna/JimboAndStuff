@@ -1,4 +1,17 @@
 return {
+	descriptions = {
+		Other ={ 
+			--[[
+			xmpl_light_mode = {
+				name = "Light Mode",
+				text = {
+					"Gains {X:chips,C:white}X#3#{} Chips",
+					"When {C:diamonds}Diamonds{} or {C:hearts}Hearts{} are scored",
+					"Currently: {X:chips,C:white}X#4#{} Chips"
+				},
+			},]]
+		},
+	},
 	misc = {
 		quips = {
 			xmpl_evil_quip1 = {
@@ -19,6 +32,7 @@ return {
 				"You are the biggest fool",
 				"I have ever seen"
 			}
-		}	
-	}
+		}
+	},
+	
 }

@@ -976,7 +976,7 @@ SMODS.Joker
             "Increases played card's rank by {C:attention}1{}",
             "{V:1}Fun Fact: almost every joker is just jimbo{}",
             "{V:1}in a random filter in photopea...",
-            "{V:I suck at graphics and art}"
+            "{V:1}I suck at graphics and art{}"
         }
     },
     atlas = "Jokers",
@@ -986,17 +986,14 @@ SMODS.Joker
         return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play and not context.blueprint_card then
-            for i = 1, #G.play.cards do
-                G.E_MANAGER:add_event(Event({
-                    delay = 0.1,
-                    func = function()
-                        assert(SMODS.modify_rank(G.play.cards[i], 1))
-                        return true
-                    end
-                }))
+        if context.before and not context.blueprint_card then
+            local cards = 0
+            for _, scored_card in ipairs(context.scoring_hand) do
+                assert(SMODS.modify_rank(scored_card, 1))
             end
-            return{}
+            return{
+                message = "Rank Up"
+            }
         end
     end
 }
@@ -1292,7 +1289,6 @@ SMODS.Joker
         text = {
             "Copies a Joker to its left",
             "or to its right",
-            "Will only activate when hand is {C:attention}Played{}",
             "{V:1}I just make random stuff deal with it"
         }
     },
@@ -1303,21 +1299,27 @@ SMODS.Joker
         return {vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function(self, card, context)
-        if context.joker_main then
+        if context.joker_main or context.final_scoring_step or context.before or context.end_of_round or context.setting_blind or context.discard or context.buying_card or context.selling_card or context.reroll_shop then
             local copy = math.random(1,2)
             if copy == 1 then
                 local other_joker = nil
                 for i = 1, #G.jokers.cards do
                     if G.jokers.cards[i] == card then other_joker = G.jokers.cards[i + 1] end
                 end
-                return SMODS.blueprint_effect(card, other_joker, context)
+                return {
+                    SMODS.blueprint_effect(card, other_joker, context),
+                    message = {"RIGHT"}
+                }
             end
             if copy == 2 then
                 local other_joker = nil
                 for i = 1, #G.jokers.cards do
                     if G.jokers.cards[i] == card then other_joker = G.jokers.cards[i - 1] end
                 end
-                return SMODS.blueprint_effect(card, other_joker, context)
+                return {
+                    SMODS.blueprint_effect(card, other_joker, context),
+                    message = {"LEFT"}
+                }
             end
         end
     end
@@ -1501,6 +1503,137 @@ SMODS.Joker
             return{
                 level_up = G.GAME.hands[context.scoring_name].level,
                 message = "Level Up"
+            }
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "stained glass",
+    rarity = 3,
+    cost = 8,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Stained Glass",
+        text = {
+            "Glass Cards Have now {C:attention}2X{} the durability",
+            "{V:1}this is the ugliest stained glass ever{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 0, y = 3},
+    config = {extra = {}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.mod_probability and not context.blueprint and context.identifier == "glass" then
+            return {
+                denominator = context.denominator * 2
+            }
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "switcher joker",
+    rarity = 2,
+    cost = 6,
+    blueprint_compat = true,
+    loc_txt = {
+        name = "Switching Joker",
+        text = {
+            {
+                "Dark Mode:",
+                "Gains {C:mult}+#1#{} Mult",
+                "When the played card is {C:spades}Spades{} or {C:clubs}Clubs{} and is not scored",
+                "Currently {C:mult}+#2#{} Mult"
+            },
+            {
+                "Light Mode",
+                "Gains {X:chips,C:white}X#3#{} Chips",
+                "When the played card is {C:diamonds}Diamonds{} or {C:hearts}Hearts{} and is scored",
+                "Currently {X:chips,C:white}X#4#{} Chips"
+            },
+            {
+                "Will Switch to the other ability after a hand is Scored",
+                "Current Mode: #5#",
+                "{V:1}would've made it change sprites but I am a terrible programmer and artist{}"
+            }
+
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 1, y = 3},
+    config = {extra = {mult_gain = 5, current_mult = 0, Xchips_gain = 0.05, current_Xchips = 1, immutable = {current_mode = "Light"}}},
+    loc_vars = function(self, info_queue, center)
+        --info_queue[#info_queue+1] = {set = "Other", key = "xmpl_light_mode"}
+        return {vars = {center.ability.extra.mult_gain, center.ability.extra.current_mult, center.ability.extra.Xchips_gain, center.ability.extra.current_Xchips,
+        center.ability.extra.immutable.current_mode, colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.cardarea == "unscored" and context.individual and (context.other_card:is_suit("Spades") or context.other_card:is_suit("Clubs")) 
+        and not context.blueprint_card and card.ability.extra.immutable.current_mode == "Dark" then
+            card.ability.extra.current_mult = card.ability.extra.current_mult + card.ability.extra.mult_gain
+            return{
+                message = "Upgrade",
+                message_card = card
+            }
+        end
+        if context.cardarea == G.play and context.individual and (context.other_card:is_suit("Diamonds") or context.other_card:is_suit("Hearts")) 
+        and not context.blueprint_card and card.ability.extra.immutable.current_mode == "Light" then
+            card.ability.extra.current_Xchips = card.ability.extra.current_Xchips + card.ability.extra.Xchips_gain
+            return{
+                message = "Upgrade",
+                message_card = card
+            }
+        end
+        if context.joker_main then
+            if card.ability.extra.immutable.current_mode == "Light" then
+                card.ability.extra.immutable.current_mode = "Dark"
+                return{
+                    xchips = card.ability.extra.current_Xchips
+                }
+            elseif card.ability.extra.immutable.current_mode == "Dark" then
+                card.ability.extra.immutable.current_mode = "Light"
+                return{
+                    mult = card.ability.extra.current_mult
+                }
+            end
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "oiled joker",
+    rarity = 2,
+    cost = 6,
+    blueprint_compat = false,
+    loc_txt = {
+        name = "Oily Joker",
+        text = {
+            "Decreases played card's rank by {C:attention}1{}",
+            "{V:1}Fun Fact: almost every joker is just jimbo{}",
+            "{V:1}This one looks familiar{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 2, y = 3},
+    config = {extra = {}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.before and not context.blueprint_card then
+            local cards = 0
+            for _, scored_card in ipairs(context.scoring_hand) do
+                assert(SMODS.modify_rank(scored_card, -1))
+            end
+            return{
+                message = "Rank Down"
             }
         end
     end
