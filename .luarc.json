@@ -1,0 +1,19 @@
+{
+  "runtime": {
+    "version": "Lua 5.4"
+  },
+  "workspace": {
+    "library": [
+      "C:/Users/elnoor/AppData/Roaming/Balatro/Mods/smods-1.0.0-beta-0827c",
+      "C:/Users/elnoor/AppData/Roaming/Balatro/Mods/lovely/dump"
+    ]
+  },
+  "diagnostics": {
+    "globals": [
+      "SMODS",
+      "G",
+      "ease_dollars",
+      "sendDebugMessage"
+    ]
+  }
+}
