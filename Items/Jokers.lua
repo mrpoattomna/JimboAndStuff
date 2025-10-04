@@ -803,7 +803,7 @@ SMODS.Joker
     loc_txt = {
         name = "Corrupt Joker",
         text = {
-            "Increases the chances for Rares and Uncommons",
+            "Increases the chances for {C:rare}Rares{} and {C:uncommon}Uncommons{}",
             "{V:1}Sharp looking{}"
         }
     },

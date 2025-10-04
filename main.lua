@@ -9,4 +9,6 @@ JAS.optional_features = {
 assert(SMODS.load_file("Items/Jokers.lua"))()
 assert(SMODS.load_file("Items/Editions.lua"))()
 assert(SMODS.load_file("Items/Tarots.lua"))()
-assert(SMODS.load_file("Items/Specteral.lua"))()
+assert(SMODS.load_file("Items/Spectral.lua"))()
+assert(SMODS.load_file("Items/Enhancements.lua"))()
+assert(SMODS.load_file("Items/Seals.lua"))()
