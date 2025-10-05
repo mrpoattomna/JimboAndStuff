@@ -1,6 +1,3 @@
-----------------------------------------------
-------------MOD CODE -------------------------
-
 function perform_operations(val1, op, val2)
     if op == "=" then return val2 end
     if op == "+" then return val1 + val2 end
@@ -392,7 +389,7 @@ SMODS.Joker
     loc_txt = {
         name = "Glitched Joker",
         text = {
-            "{V:1}wow this mod sure loves Gambling{}"
+            "{V:1}More gambling Jokers{}"
         }
     },
     atlas = "Jokers",
@@ -434,14 +431,14 @@ SMODS.Joker
     loc_txt = {
         name = "Simplified Joker",
         text = {
-            "All cards are considered wild cards",
+            "All cards are considered The same suit",
+            "Prevents Cards from getting debuffed",
             "{V:1}are suits too much for you?{}"
         }
     },
     atlas = "Jokers",
     pos = {x = 7, y = 0},
     loc_vars = function (self, info_queue, card)
-        info_queue[#info_queue+1] = G.P_CENTERS.m_wild
         return{vars = {colours = {HEX("dda0dd")}}}
     end,
     calculate = function (self, card, context)
@@ -1236,7 +1233,7 @@ SMODS.Joker
         text = {
             "Copies a Joker to its left",
             "or to its right",
-            "{V:1}I just make random stuff deal with it"
+            "{V:1}2 Sides of the Void one of them shall consume{}",
         }
     },
     atlas = "Jokers",
@@ -1563,7 +1560,6 @@ SMODS.Joker
         name = "Oily Joker",
         text = {
             "Decreases played card's rank by {C:attention}1{}",
-            "{V:1}Fun Fact: almost every joker is just jimbo{}",
             "{V:1}This one looks familiar{}"
         }
     },
@@ -1586,5 +1582,140 @@ SMODS.Joker
     end
 }
 
-----------------------------------------------
-------------MOD CODE END----------------------
+SMODS.Joker
+{
+    key = "very epik joker",
+    rarity = 3,
+    cost = 8,
+    blueprint_compat = false,
+    loc_txt = {
+        name = "Very Epik Joker",
+        text = {
+            "{C:attention}Epik Seals{} Will no Longer Break",
+            "Reduced Change for them to destroy the hand",
+            "{V:1}EPIK FACE EVERYWHERE{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 3, y = 3},
+    config = {extra = {}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.mod_probability and not context.blueprint_card and context.identifier == "epik_face_itself" then
+            return{
+                numerator = 0
+            }
+        end
+        if context.mod_probability and not context.blueprint_card and context.identifier == "epik_face_hand" then
+            return{
+                denominator = context.denominator*3
+            }
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "empty joker",
+    rarity = 3,
+    cost = 9,
+    blueprint_compat = false,
+    loc_txt = {
+        name = "Empty Joker",
+        text = {
+            "Does Nothing?",
+            "Hint:requires Royalty",
+            "{V:1}I got lazy{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 4, y = 3},
+    config = {},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.before and not context.blueprint_card and G.GAME.current_round.current_hand.handname == localize("Royal Flush", "poker_hands") then
+            G.jokers:change_size(1)
+            return{
+                message = "Your Majesty"
+            }
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "jimbo coin",
+    rarity = 2,
+    cost = 5,
+    blueprint_compat = false,
+    loc_txt = {
+        name = "Jimbo Coin",
+        text = {
+            "{C:money}-#1#${} at the start of a round",
+            "Double its own sell value",
+            "If you can't afford investment resets its sell value",
+            "{V:1}INVEST IN JIMBO COIN{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 5, y = 3},
+    config = {extra = {lose_money = 10}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.lose_money, colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.setting_blind and G.GAME.dollars >= card.ability.extra.lose_money and not context.blueprint_card then
+            card.sell_cost = card.sell_cost * 2
+            card:set_cost()
+            return{
+                message = "INVESTMENT",
+                dollars = -card.ability.extra.lose_money
+            }
+        elseif context.setting_blind and G.GAME.dollars < card.ability.extra.lose_money and not context.blueprint_card then
+            card.sell_cost = 1
+            return{
+                message = "STOCK CRASHED"
+            }
+        end
+    end
+}
+
+SMODS.Joker
+{
+    key = "no fortune",
+    rarity = 2,
+    cost = 5,
+    blueprint_compat = false,
+    loc_txt = {
+        name = "wheel of Misfortune",
+        text = {
+            "Every Time a {C:attention}Wheel of Fortune{} Fails",
+            "{C:green}+#1# numerator{}",
+            "Resets when Wheel of Fortune Succeeds",
+            "Currently {C:attention}#2#{} Wheel of Fortune fails in a row",
+            "{V:1}I was too lazy to steal the assets so enjoy my drawing{}"
+        }
+    },
+    atlas = "Jokers",
+    pos = {x = 6, y = 3},
+    config = {extra = {numeratorplus = 1, extranumerator = 0}},
+    loc_vars = function(self, info_queue, center)
+        return {vars = {center.ability.extra.numeratorplus, center.ability.extra.extranumerator, colours = {HEX("dda0dd")}}}
+    end,
+    calculate = function(self, card, context)
+        if context.pseudorandom_result and not context.result and context.identifier == 'wheel_of_fortune' and not context.blueprint then
+            card.ability.extra.extranumerator = card.ability.extra.extranumerator + card.ability.extra.numeratorplus
+        elseif context.pseudorandom_result and context.result and context.identifier == 'wheel_of_fortune' and not context.blueprint then
+            card.ability.extra.extranumerator = 0
+        end
+        if context.mod_probability and not context.blueprint_card then
+            return{
+                numerator = context.numerator + card.ability.extra.extranumerator
+            }
+        end
+    end
+}
