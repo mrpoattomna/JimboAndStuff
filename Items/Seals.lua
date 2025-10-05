@@ -36,7 +36,7 @@ SMODS.Seal{
         return{vars = {card.ability.seal.extra.retriggers, numerator1 , denominator1, numerator2, denominator2}}
     end,
     calculate = function (self, card, context)
-        if context.after and context.cardarea == G.play and SMODS.pseudorandom_probability(card, "xmpl_epik_face", 1, card.ability.seal.extra.odds1) then
+        if context.final_scoring_step and context.cardarea == G.play and SMODS.pseudorandom_probability(card, "xmpl_epik_face_hand", 1, card.ability.seal.extra.odds1) then
             for i = 1, #G.hand.cards do
                 SMODS.destroy_cards(G.hand.cards[i])
             end
@@ -45,9 +45,10 @@ SMODS.Seal{
                 sound = "xmpl_bruh"
             }
         end
-        if context.after and context.cardarea == G.play and SMODS.pseudorandom_probability(card, "xmpl_epik_face", 1, card.ability.seal.extra.odds2) then
-            SMODS.destroy_cards(card)
+        if context.destroy_card and context.destroy_card == card and SMODS.pseudorandom_probability(card, "xmpl_epik_face_self", 1, card.ability.seal.extra.odds2)
+        and context.cardarea == G.play then
             return{
+                remove = true,
                 message = "EPIK OUTRO",
                 sound = "xmpl_vine"
             }
