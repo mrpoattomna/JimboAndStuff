@@ -1691,7 +1691,7 @@ SMODS.Joker
     cost = 5,
     blueprint_compat = false,
     loc_txt = {
-        name = "wheel of Misfortune",
+        name = "Wheel of Misfortune",
         text = {
             "Every Time a {C:attention}Wheel of Fortune{} Fails",
             "{C:green}+#1# numerator{}",
