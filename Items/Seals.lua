@@ -45,7 +45,7 @@ SMODS.Seal{
                 sound = "xmpl_bruh"
             }
         end
-        if context.after and context.cardarea == G.play and SMODS.pseudorandom_probability(card, "xmpl_epik_face", 1, card.ability.seal.extra.odds2) then
+        if context.after and SMODS.pseudorandom_probability(card, "xmpl_epik_face", 1, card.ability.seal.extra.odds2) then
             SMODS.destroy_cards(card)
             return{
                 message = "EPIK OUTRO",
