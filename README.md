@@ -19,3 +19,5 @@ Currently Adds
 New Consumable type called Would you rather with 15 cards
 
 these cards can only appear in packs and would you rather packs can't be skipped
+
+NO TALISMAN INCOMPATIBLE
